@@ -363,6 +363,7 @@ class SimplePeerWrapper {
             // ERR_DATA_CHANNEL
             // ERR_CONNECTION_FAILURE
             console.log(err);
+            window.location.reload();
         });
     }
 
