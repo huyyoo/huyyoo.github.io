@@ -1,56 +1,22 @@
-let serverVideo;
-let state = "on";
-let broker = {
-  hostname: 'broker.hivemq.com',
-  port: 8000
-};
-let client;
-let topic = 'drop';
-
+let myVideo;
+let otherVideo;
 
 function setup() {
   createCanvas(640, 480);
-  let p5l = new p5LiveMedia(this, "CAPTURE", serverVideo, "jZQ64AMJc_TESTTEST");
-  p5l.on('stream', gotStream);
-
-  client = new Paho.MQTT.Client(broker.hostname, broker.port, "p5_Client");
-  client.onConnectionLost = onConnectionLost;
-  client.connect({onSuccess: onConnect,});
+  myVideo = createCapture(VIDEO, 
+    function(stream) {
+      let p5l = new p5LiveMedia(this, "CAPTURE", stream, "jZQ64AMJc_TESTTEST");
+    }
+  );  
+  myVideo.muted = true;     
+  myVideo.hide();
 }
 
 function draw() {
   background(220);
-  if (serverVideo != null) {
-    image(serverVideo,0,0);
-  }  
-}
-
-function gotStream(stream, id) {
-  serverVideo = stream;
-  serverVideo.hide();
-}
-
-function mousePressed() {
-  sendMqttMessage(state);
-  if(state == "on") state = "off";
-  else state = "on";
-}
-
-function onConnect() {
-  console.log("new client is connected");
-}
-
-function onConnectionLost(response) {
-  if (response.errorCode !== 0) {
-      console.log('onConnectionLost:' + response.errorMessage);
+  stroke(255);
+  if (myVideo != null) {
+    image(myVideo,0,0);
   }
 }
 
-function sendMqttMessage(msg) {
-  if (client.isConnected()) {
-      message = new Paho.MQTT.Message(msg);
-      message.destinationName = topic;
-      client.send(message);
-      console.log('I sent: ' + message.payloadString);
-  }
-}
